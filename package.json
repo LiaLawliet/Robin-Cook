@@ -1,7 +1,7 @@
 {
-  "name": "phaser3-project-template",
+  "name": "Robin-Cook",
   "version": "1.0.8",
-  "description": "A Phaser 3 Project Template",
+  "description": "Platformer game",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

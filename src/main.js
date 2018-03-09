@@ -20,4 +20,4 @@ const game = new Phaser.Game({
 
 game.scene.add('jeu', jeuScene);
 
-game.scene.start('jeu')
+game.scene.start('jeu');
