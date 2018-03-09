@@ -1,8 +1,8 @@
-import Phaser from 'phaser'
-import {Controller} from 'leapjs'
-import jeuScene from './jeu.scene.js'
-import {getCoords} from './utils.js'
-import config from './config.js'
+import Phaser from 'phaser';
+import {Controller} from 'leapjs';
+import jeuScene from './jeu.scene.js';
+import {getCoords} from './utils.js';
+import config from './config.js';
 
 const game = new Phaser.Game({
     type: Phaser.AUTO,

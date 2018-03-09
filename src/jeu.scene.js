@@ -1,3 +1,5 @@
+import config from './config'
+
 export default {
     preload : preload,
     create : create,
@@ -6,7 +8,7 @@ export default {
 }
 // Variables
 let platforms = [
-    {x:400,y:568},
+    {x: config.width/2 , y:config.height, scale: 2},
     {x:600,y:400},
     {x:50,y:250},
     {x:750,y:220}
@@ -34,13 +36,15 @@ function create (){
     this.add.image(400, 300, 'bg');
 
     // Create platforms
-    objectPlatform = this.add.group();
+    objectPlatform = this.physics.add.staticGroup();
     objectPlatform.enableBody = true;
 
     platforms.forEach(platform => {
-        objectPlatform.create(platform.x, platform.y, 'ground');
+        objectPlatform
+            .create(platform.x, platform.y, 'ground')
+            .setScale( platform.scale ? platform.scale : 1 )
+            .refreshBody()
     });
-    objectPlatform.children.entries[0].setScale(2);
 
     // Player
     player = this.physics.add.sprite(100, 450, 'dude');
@@ -68,6 +72,7 @@ function create (){
 
     //cheeses and scoring
     cheeses = this.physics.add.group({ key: 'cheese', repeat: 11, setXY: { x: 12, y: 0, stepX: 70 } });
+    cheeses.enableBody = true;
     scoreText = this.add.text(16, 16,`Fromage:  ${score}` , { fontSize: '20px', fill: '#000' });
 
     // Overlap player / cheeses
@@ -76,15 +81,9 @@ function create (){
 }
 
 function update(){
-    /*for (i = 0; i < objectPlatform; i++){
-        this.physics.collide(player, objectPlatform.children.entries[i]);
-    }
-
-    for (i = 0; i < objectPlatform; i++){
-        this.physics.add.collider(player, objectPlatform.children.entries[i]);
-    }
-    */
     this.physics.add.collider(player, objectPlatform);
+    this.physics.add.collider(cheeses, objectPlatform);
+
     movement();
 }
 
