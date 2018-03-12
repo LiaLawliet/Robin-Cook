@@ -13,6 +13,10 @@ let objectPlatform;
 let player;
 let input;
 
+let wolfs;
+let frameNames
+
+
 let cheeses;
 let score = 0;
 let scoreText;
@@ -25,6 +29,7 @@ function preload (){
     this.load.image('cheese', 'assets/test/fromage.png');
     this.load.image('bomb', 'assets/test/bomb.png');
     this.load.spritesheet('player', 'assets/test/dude.png',{frameWidth: 32,frameHeight: 48});
+    this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 165 ,frameHeight: 170});
 }
 
 function create (){
@@ -45,6 +50,24 @@ function create (){
     // Player
     player = this.physics.add.sprite(100, 450, 'player');
     player.setCollideWorldBounds(true);
+
+    //Wolf
+    
+    wolfs = this.physics.add.sprite(700, 450, 'wolf').setScale(0.4);
+
+    // Wolfs animation
+    var test = {
+        key: 'walk',
+        frames: this.anims.generateFrameNumbers('wolf'),
+        framerate: 24,
+        yoyo: true,
+        repeat: -1
+    };
+
+    this.anims.create(test);
+    console.log(this.anims);
+    wolfs.anims.load('walk');
+    wolfs.anims.play('walk');
 
     // Sprite animation
     this.anims.create({
@@ -80,10 +103,13 @@ function create (){
 }
 
 function update(){
+
     // Collision
     this.physics.add.collider(player, objectPlatform);
     this.physics.add.collider(cheeses, objectPlatform);
     this.physics.add.collider(bombs, objectPlatform);
+    this.physics.add.collider(wolfs, objectPlatform);
+    this.physics.add.collider(player, wolfs);
     this.physics.add.collider(player, bombs, hitBomb, null, this);
 
     movement();
