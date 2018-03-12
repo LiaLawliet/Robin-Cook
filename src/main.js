@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
 import {Controller} from 'leapjs';
-import jeuScene from './jeu.scene.js';
-import {getCoords} from './utils.js';
-import config from './config.js';
+
+//scenes
+import jeuScene from './jeu.scene';
+import menuScene from './menu.scene';
+
+import {getCoords} from './utils';
+import config from './config';
 
 const game = new Phaser.Game({
     type: Phaser.AUTO,
@@ -18,6 +22,8 @@ const game = new Phaser.Game({
     }
 });
 
+game.scene.add('menu', menuScene);
 game.scene.add('jeu', jeuScene);
 
-game.scene.start('jeu');
+
+game.scene.start('menu');
