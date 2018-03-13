@@ -13,7 +13,7 @@ export default class menuScene extends Phaser.Scene {
 
     update(){
         if (this.enterKey.isDown){
-            this.scene.start('jeu');
+            this.scene.start('level1');
         }
     }
 }

@@ -1,4 +1,7 @@
 import config from './config';
+import Leap  from 'leapjs';
+
+import {getCoords} from './utils';
 
 export default {
     preload : preload,
@@ -11,6 +14,7 @@ let platforms = [ {x: config.width/2 , y:config.height, scale: 2}, {x:600,y:400}
 let objectPlatform;
 
 let player;
+let palm;
 let input;
 
 let wolfs;
@@ -36,7 +40,6 @@ function create (){
     // Create platforms
     objectPlatform = this.physics.add.staticGroup();
     objectPlatform.enableBody = true;
-
     platforms.forEach(platform => {
         objectPlatform
             .create(platform.x, platform.y, 'ground')
@@ -48,26 +51,56 @@ function create (){
     player = this.physics.add.sprite(100, 450, 'player');
     player.setCollideWorldBounds(true);
 
+
+    // Player movement
+
+    const myController = new Leap.Controller({enableGestures: true});
+    myController.connect();
+
+
+    myController.on('frame', (frame) => {
+        frame.hands.forEach( hand => {
+            palm = getCoords(hand.palmPosition, frame);
+
+            if (palm.x >= 100){
+                player.anims.play('right', true);
+                player.setVelocityX(palm.x);
+            }else{
+                player.anims.play('left', true);
+                player.setVelocityX(palm.x);
+            }
+
+            if(palm.x > 0 && palm.x < 100 ){
+                player.anims.play('turn', true);
+                player.setVelocityX(0);
+            }
+            if (hand.grabStrength > .90 && player.body.touching.down) {
+                player.setVelocityY(-200);
+            }
+            console.log(palm);
+        });
+    });
+
+
     // Wolfs animation
     this.anims.create({
         key: 'walk',
         frames: this.anims.generateFrameNumbers('wolf'),
         frameRate: 4,
-        repeat: -1
+        repeat: -1,
+        delay: 0.9
     });
-    //Wolf
     wolfs = this.physics.add.sprite(700, 533, 'wolf').setScale(0.4).play('walk');
-
     this.tweens.add({
         targets: wolfs,
         x: { value: wolfs.x-(Math.random()*200+100), duration: 4000 },
         autoStart: true,
-        delay: 0,
+        delay: 1000,
         repeat: -1,
         yoyo: true
     });
 
-    // Sprite animation
+    // Player animation
     this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
@@ -94,20 +127,21 @@ function create (){
 
     // Overlap player / cheeses
     this.physics.add.overlap(player, cheeses, collectCheese, null, this);
+
 }
 
 function update(){
 
     // Collision
     this.physics.add.collider(player, objectPlatform);
+    this.physics.add.collider(player, wolfs);
     this.physics.add.collider(cheeses, objectPlatform);
     this.physics.add.collider(wolfs, objectPlatform);
-    this.physics.add.collider(player, wolfs);
 
     movement();
 }
 function movement(){
-    if (input.left.isDown){
+    /*if (input.left.isDown){
         player.setVelocityX(-160);
         player.anims.play('left', true);
     }
@@ -117,11 +151,11 @@ function movement(){
     }else{
         player.setVelocityX(0);
         player.anims.play('turn');
-    }
-
+    }*/
+    /*
     if (input.up.isDown && player.body.touching.down){
         player.setVelocityY(-390);
-    }
+    }*/
 }
 function collectCheese (player, cheese){
     cheese.disableBody(true, true);

@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
-import {Controller} from 'leapjs';
 
 //scenes
 import jeuScene from './jeu.scene';
 import menuScene from './menu.scene';
+import Level1 from './level1';
 
-import {getCoords} from './utils';
 import config from './config';
 
 const game = new Phaser.Game({
@@ -24,6 +23,7 @@ const game = new Phaser.Game({
 
 game.scene.add('menu', menuScene);
 game.scene.add('jeu', jeuScene);
+game.scene.add('level1', Level1),
 
 
 game.scene.start('menu');
