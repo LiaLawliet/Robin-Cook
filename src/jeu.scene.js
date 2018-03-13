@@ -14,22 +14,19 @@ let player;
 let input;
 
 let wolfs;
-let frameNames
+let frameNames;
 
 
 let cheeses;
 let score = 0;
 let scoreText;
 
-let bombs;
-
 function preload (){
     this.load.image('bg', 'assets/test/BG.png');
     this.load.image('ground', 'assets/test/platform.png');
     this.load.image('cheese', 'assets/test/fromage.png');
-    this.load.image('bomb', 'assets/test/bomb.png');
     this.load.spritesheet('player', 'assets/test/dude.png',{frameWidth: 32,frameHeight: 48});
-    this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 165 ,frameHeight: 170});
+    this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 170 ,frameHeight: 170});
 }
 
 function create (){
@@ -51,23 +48,24 @@ function create (){
     player = this.physics.add.sprite(100, 450, 'player');
     player.setCollideWorldBounds(true);
 
-    //Wolf
-    
-    wolfs = this.physics.add.sprite(700, 450, 'wolf').setScale(0.4);
-
     // Wolfs animation
-    var test = {
+    this.anims.create({
         key: 'walk',
         frames: this.anims.generateFrameNumbers('wolf'),
-        framerate: 24,
-        yoyo: true,
+        frameRate: 4,
         repeat: -1
-    };
+    });
+    //Wolf
+    wolfs = this.physics.add.sprite(700, 533, 'wolf').setScale(0.4).play('walk');
 
-    this.anims.create(test);
-    console.log(this.anims);
-    wolfs.anims.load('walk');
-    wolfs.anims.play('walk');
+    this.tweens.add({
+        targets: wolfs,
+        x: { value: wolfs.x-(Math.random()*200+100), duration: 4000 },
+        autoStart: true,
+        delay: 0,
+        repeat: -1,
+        yoyo: true
+    });
 
     // Sprite animation
     this.anims.create({
@@ -94,12 +92,8 @@ function create (){
     cheeses.enableBody = true;
     scoreText = this.add.text(16, 16,`Fromage:  ${score}` , { fontSize: '20px', fill: '#000' });
 
-    // Bomb
-    bombs = this.physics.add.group();
-
     // Overlap player / cheeses
     this.physics.add.overlap(player, cheeses, collectCheese, null, this);
-
 }
 
 function update(){
@@ -107,14 +101,11 @@ function update(){
     // Collision
     this.physics.add.collider(player, objectPlatform);
     this.physics.add.collider(cheeses, objectPlatform);
-    this.physics.add.collider(bombs, objectPlatform);
     this.physics.add.collider(wolfs, objectPlatform);
     this.physics.add.collider(player, wolfs);
-    this.physics.add.collider(player, bombs, hitBomb, null, this);
 
     movement();
 }
-
 function movement(){
     if (input.left.isDown){
         player.setVelocityX(-160);
@@ -140,26 +131,10 @@ function collectCheese (player, cheese){
     (score <= 1) ? (scoreText.setText( `Fromage: ${score}` )) : ( scoreText.setText( `Fromages: ${score}` ));
 
     if (cheeses.countActive(true) === 0){
-        // Respawn cheeses if number cheese = 0
         cheeses.children.iterate(function (child) {
             child.enableBody(true, child.x, 0, true, true);
         });
-        spawnBomb();
     }
-}
-function spawnBomb(){
-    let x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-    let bomb = bombs.create(x, 16, 'bomb');
-    bomb.setBounce(1);
-    bomb.setCollideWorldBounds(true);
-    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    bomb.allowGravity = false;
-}
-function hitBomb (player, bomb) {
-    this.physics.pause(); // Block player
-    player.setTint(0xff0000); // Red color
-    player.anims.play('turn');
 }
 function render() {
 
