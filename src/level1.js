@@ -14,6 +14,7 @@ export default class Level1 extends Phaser.Scene{
         this.loadRun();
         this.loadRunReverse();
         this.loadPlatform();
+        this.loadProps();
         this.load.image('arrow', 'assets/spritesEnvironement/desertSprite/SignArrow.png');
         this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
     }
@@ -21,6 +22,26 @@ export default class Level1 extends Phaser.Scene{
     create(){
         // Background
         this.add.image(640, 330, 'bg');
+
+
+        // Props
+        this.add.image(100,130,'bush').setScale(.6);
+        this.add.image(800,615,'bush').setScale(.6);
+
+        this.add.image(130,517,'skeleton').setScale(.9);
+        this.add.image(745,380,'skeleton').setScale(.9);
+
+        this.add.image(1200,495,'cactus').setScale(.9);
+
+        this.add.image(50,517,'stone');
+        this.add.image(580,232,'stone').setScale(.9);
+
+        this.add.image(820,310,'tree').setScale(.7);
+
+        this.add.image(450,240,'grass').setScale(.7);
+        this.add.image(895,375,'grass').setScale(.9);
+
+
 
         // Anim joueur
         this.anims.create({
@@ -107,6 +128,9 @@ export default class Level1 extends Phaser.Scene{
                 .refreshBody();
         });
 
+
+
+
         // Leap Motion
         leapMovement.call(this);
 
@@ -172,6 +196,14 @@ export default class Level1 extends Phaser.Scene{
         this.load.image('sPlatform', 'assets/spritesEnvironement/desertSprite/sPlatform.png');
         this.load.image('hPlatform', 'assets/spritesEnvironement/desertSprite/hPlatform.png');
         this.load.image('blockPlatform', 'assets/spritesEnvironement/desertSprite/blockPlatform.png');
+    }
+    loadProps(){
+        this.load.image('bush', 'assets/spritesEnvironement/desertSprite/bush.png');
+        this.load.image('grass', 'assets/spritesEnvironement/desertSprite/grass.png');
+        this.load.image('cactus', 'assets/spritesEnvironement/desertSprite/cactus.png');
+        this.load.image('tree', 'assets/spritesEnvironement/desertSprite/tree.png');
+        this.load.image('skeleton', 'assets/spritesEnvironement/desertSprite/skeleton.png');
+        this.load.image('stone', 'assets/spritesEnvironement/desertSprite/stone.png');
     }
     movement(){
         if (this.input.left.isDown){
