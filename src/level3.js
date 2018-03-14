@@ -1,11 +1,12 @@
 import Leap from "leapjs";
+import config from './config';
 import { getCoords } from "./utils";
-import leapMovement from "./leapMotionMovement";
-import config from "./config";
+import leapMovement from './leapMotionMovement'
 
-export default class Level2 extends Phaser.Scene{
+
+export default class Level3 extends Phaser.Scene {
     constructor (){
-        super({ key: 'level2' });
+        super( { key: 'level3' } );
     }
     preload(){
         this.load.image('bg', 'assets/spritesEnvironement/desertSprite/BG.png');
@@ -13,11 +14,11 @@ export default class Level2 extends Phaser.Scene{
         this.loadRun();
         this.loadRunReverse();
         this.loadPlatform();
+
         this.load.image('arrow', 'assets/spritesEnvironement/desertSprite/SignArrow.png');
         this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
     }
     create(){
-
         // Background
         this.add.image(640, 330, 'bg');
 
@@ -70,62 +71,64 @@ export default class Level2 extends Phaser.Scene{
             repeat: -1
         });
 
-        // Add player
-        this.player = this.physics.add.sprite(40, 510, 'Idle1').setCollideWorldBounds(true).setScale(0.19).play('idle');
+        this.player = this.physics.add.sprite(50, 490, 'Idle1').setScale(0.19).setCollideWorldBounds(true).play('idle');
         this.input = this.input.keyboard.createCursorKeys();
-        // Create platform
-        this.hPlatforms = [{x:-50,y:670, scale:0.45}, {x:1280,y:770, scale:0.45}];
-        this.stonePlatforms = [{x:310,y:470, scale: .3}, {x:500,y:330, scale: .3},{x:710,y:200, scale: .3}, {x:900,y:330, scale: .3}, {x:1110,y:470, scale: .3}];
-        this.cheeses = [{x:310,y:440},{x:500,y:300},{x:710,y:170},{x:900,y:300},{x:1110,y:440},];
 
-        //Platform group
+
+        //create positions
+        this.sPlatforms = [ {x:350,y:400, scale: .2}, {x:500,y:250, scale: .2}, {x:825,y:700, scale: .6}, {x:850,y:170, scale: .25} ];
+        this.hPlatforms = [ {x: 70, y: 650, scale: .45}, {x: 50, y: 250, scale: .30}, {x: 1115, y: 650, scale: .45}, {x: 1210, y: 290, scale: .3} ];
+        this.cheeses = [{x:360,y:375},{x:50,y:160},{x:510,y:229},{x:860,y:142},{x:1150,y:200},];
+
+
+        // Group platform
         this.objectPlatform = this.physics.add.staticGroup();
         this.objectPlatform.enableBody = true;
+
+        this.sPlatforms.forEach(sPlatform => {
+            this.objectPlatform
+                .create(sPlatform.x, sPlatform.y, 'sPlatform')
+                .setScale( sPlatform.scale ? sPlatform.scale : 1 )
+                .refreshBody();
+        });
         this.hPlatforms.forEach(hPlatform => {
             this.objectPlatform
                 .create(hPlatform.x, hPlatform.y, 'hPlatform')
                 .setScale( hPlatform.scale ? hPlatform.scale : 1 )
                 .refreshBody();
         });
-        this.stonePlatforms.forEach(stonePlatform => {
-            this.objectPlatform
-                .create(stonePlatform.x, stonePlatform.y, 'stonePlatform')
-                .setScale( stonePlatform.scale ? stonePlatform.scale : 1 )
-                .refreshBody();
-        });
 
-        // Chesses group
+
+        // Group cheeses
         this.objectCheeses = this.physics.add.staticGroup();
         this.objectCheeses.enableBody = true;
+
         this.cheeses.forEach(cheese => {
             this.objectCheeses
                 .create(cheese.x, cheese.y, 'cheese')
                 .setScale( cheese.scale ? cheese.scale : 1 )
                 .refreshBody();
         });
-
-        //Score
-        this.score = 0;
-        this.scoreText = this.add.text(16, 16,`Fromage:  ${this.score}` , { fontSize: '20px', fill: '#000' });
-
         // Leap Motion
         leapMovement.call(this);
 
+        //score
+        this.score = 0;
+        this.scoreText = this.add.text(16, 16,`Fromage:  ${this.score}` , { fontSize: '20px', fill: '#000' });
 
-        // Collect cheeses
         this.physics.add.overlap(this.player, this.objectCheeses, this.collectCheese, null, this);
 
         // Next level
-        this.nextLevel = this.physics.add.image(1200, 83,'arrow');
+        this.nextLevel = this.physics.add.image(1200, 495,'arrow');
         this.physics.add.overlap(this.player, this.nextLevel, this.startNextLevel, null, this);
-    }
 
+    }
     update(){
         // Collision
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
-
         this.movement();
+
         if (this.player.y + (this.player.height * 0.19) >= config.height) {
             this.scene.start('gameover');
         }
@@ -177,19 +180,19 @@ export default class Level2 extends Phaser.Scene{
         this.load.image('Run8Reverse', 'assets/spritesCharacter/Robin_Cook/Run8Reverse.png');
     }
     loadPlatform(){
+        this.load.image('sPlatform', 'assets/spritesEnvironement/desertSprite/sPlatform.png');
         this.load.image('hPlatform', 'assets/spritesEnvironement/desertSprite/hPlatform.png');
-        this.load.image('stonePlatform', 'assets/spritesEnvironement/desertSprite/StoneBlock.png');
+        this.load.image('blockPlatform', 'assets/spritesEnvironement/desertSprite/blockPlatform.png');
     }
     collectCheese(player,cheeses){
         cheeses.disableBody(true, true);
-
         this.score += 1;
         (this.score <= 1) ? (this.scoreText.setText( `Fromage: ${this.score}` )) : ( this.scoreText.setText( `Fromages: ${this.score}` ));
     }
     startNextLevel(player, nextLevel){
         if (this.objectCheeses.countActive(true) === 0){
             nextLevel.disableBody(true, true);
-            this.scene.start('menu');
+            this.scene.start('win');
         }
     }
 }

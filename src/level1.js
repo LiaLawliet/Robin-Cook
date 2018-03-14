@@ -1,5 +1,7 @@
 import Leap from "leapjs";
+import config from './config';
 import { getCoords } from "./utils";
+import leapMovement from './leapMotionMovement'
 
 export default class Level1 extends Phaser.Scene{
     constructor (){
@@ -69,14 +71,11 @@ export default class Level1 extends Phaser.Scene{
             repeat: -1
         });
 
-        this.player = this.physics.add.sprite(50, 490, 'Idle1')
-                          .setScale(0.19)
-                          .setCollideWorldBounds(true)
-                          .play('idle');
+        this.player = this.physics.add.sprite(50, 490, 'Idle1').setScale(0.19).setCollideWorldBounds(true).play('idle');
         this.input = this.input.keyboard.createCursorKeys();
 
 
-        // Create platform
+        // Create object
         this.sPlatforms = [ {x:510,y:270, scale: .35}, {x:810,y:410, scale: .35} ];
         this.hPlatforms = [ {x: 70, y: 650, scale: .45}, {x: 50, y: 250, scale: .40}, {x: 1190, y: 650, scale: .45},{x: 1210, y: 200, scale: .3}, {x: 750, y: 750, scale: .45} ];
         this.cheeses = [{x:400,y:440},{x:50,y:135},{x:510,y:238},{x:900,y:100},{x:1110,y:440},];
@@ -109,36 +108,7 @@ export default class Level1 extends Phaser.Scene{
         });
 
         // Leap Motion
-        const myController = new Leap.Controller({enableGestures: true});
-        myController.connect();
-        myController.on('frame', (frame) => {
-
-            this.player.setVelocityX(0);
-
-            frame.hands.forEach( hand => {
-                this.palm = getCoords(hand.palmPosition, frame);
-
-                this.player.setVelocityX(this.palm.x/2);
-
-                if (this.palm.x > 10){
-                    this.player.anims.play('runRight');
-                }else{
-                    this.player.anims.play('runLeft');
-                }
-
-                if(this.palm.x > 0 && this.palm.x < 100 ){
-                    this.player.anims.play('idle', true);
-                    this.player.setVelocityX(0);
-                }
-
-                if (hand.grabStrength >= .80 && this.player.body.touching.down){
-                    this.player.setVelocityY(-300);
-                }
-
-            });
-        });
-
-
+        leapMovement.call(this);
 
         //score
         this.score = 0;
@@ -155,11 +125,15 @@ export default class Level1 extends Phaser.Scene{
 
         // Collision
         this.physics.add.collider(this.player, this.objectPlatform);
-        this.physics.add.collider(this.cheeses, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
 
         //movement
         this.movement();
+
+        // Dies ?
+        if (this.player.y + (this.player.height * 0.19) >= config.height) {
+            this.scene.start('gameover');
+        }
     }
 
     loadIdle(){
@@ -200,9 +174,8 @@ export default class Level1 extends Phaser.Scene{
         this.load.image('blockPlatform', 'assets/spritesEnvironement/desertSprite/blockPlatform.png');
     }
     movement(){
-        /*if (this.input.left.isDown){
+        if (this.input.left.isDown){
             this.player.setVelocityX(-160);
-            // this.player.anims.stop('snooze');
         }else if (this.input.right.isDown){
             this.player.setVelocityX(160);
             this.player.anims.play('run');
@@ -211,7 +184,7 @@ export default class Level1 extends Phaser.Scene{
         }
         if (this.input.up.isDown && this.player.body.touching.down){
             this.player.setVelocityY(-300);
-        }*/
+        }
     }
     collectCheese(player,cheeses){
         cheeses.disableBody(true, true);
