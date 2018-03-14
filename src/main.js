@@ -1,15 +1,13 @@
 import Phaser from 'phaser';
+import config from './config';
 
 //scenes
-import jeuScene from './jeu.scene';
 import menuScene from './menu.scene';
 import Level1 from './level1';
-
-import config from './config';
+import Level2 from './level2';
 
 const game = new Phaser.Game({
     type: Phaser.AUTO,
-    parent: 'phaser-example',
     width: config.width,
     height: config.height,
     physics: {
@@ -22,8 +20,8 @@ const game = new Phaser.Game({
 });
 
 game.scene.add('menu', menuScene);
-game.scene.add('jeu', jeuScene);
-game.scene.add('level1', Level1),
+game.scene.add('level1', Level1);
+game.scene.add('level2', Level2);
 
 
 game.scene.start('menu');

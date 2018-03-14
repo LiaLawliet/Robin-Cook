@@ -27,7 +27,7 @@ let scoreText;
 
 function preload (){
     this.load.image('bg', 'assets/test/BG.png');
-    this.load.image('ground', 'assets/test/platform.png');
+    this.load.image('ground', 'assets/test/sPlatform.png');
     this.load.image('cheese', 'assets/test/fromage.png');
     this.load.spritesheet('player', 'assets/test/dude.png',{frameWidth: 32,frameHeight: 48});
     this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 170 ,frameHeight: 170});
@@ -35,7 +35,7 @@ function preload (){
 
 function create (){
     // Background
-    this.add.image(400, 300, 'bg');
+    this.add.image(0, 500, 'bg');
 
     // Create platforms
     objectPlatform = this.physics.add.staticGroup();
