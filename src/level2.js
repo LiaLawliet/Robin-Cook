@@ -133,9 +133,9 @@ export default class Level2 extends Phaser.Scene{
 
     movement(){
         if (this.input.left.isDown){
-            this.player.setVelocityX(-160);
+            this.player.setVelocityX(-300);
         }else if (this.input.right.isDown){
-            this.player.setVelocityX(160);
+            this.player.setVelocityX(300);
             this.player.anims.play('run');
         }else{
             this.player.setVelocityX(0);
