@@ -120,7 +120,7 @@ export default class Level4 extends Phaser.Scene{
 
         //score
         this.score = 0;
-        this.scoreText = this.add.text(16, 16,`Ingrédients:  ${this.score}` , { fontSize: '20px', fill: '#000' });
+        this.scoreText = this.add.text(16, 16,`Ingrédients:  ${this.score} / ${this.listIngredients.length}` , { fontSize: '20px', fill: '#000' });
 
         this.physics.add.overlap(this.player, this.objectIngredients, this.collectIngredients, null, this);
 
@@ -191,7 +191,7 @@ export default class Level4 extends Phaser.Scene{
     collectIngredients(player,ingredients){
         ingredients.disableBody(true, true);
         this.score += 1;
-        (this.score <= 1) ? (this.scoreText.setText( `Ingrédient: ${this.score}` )) : ( this.scoreText.setText( `Ingrédients: ${this.score}` ));
+        (this.score <= 1) ? (this.scoreText.setText( `Ingrédient:  ${this.score} / ${this.listIngredients.length}` )) : ( this.scoreText.setText( `Ingrédients:  ${this.score} / ${this.listIngredients.length}` ));
     }
     startNextLevel(player, nextLevel){
         if (this.objectIngredients.countActive(true) === 0){
