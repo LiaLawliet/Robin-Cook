@@ -1,7 +1,5 @@
-import Leap from "leapjs";
-import { getCoords } from "./utils";
-import leapMovement from "./leapMotionMovement";
 import config from "./config";
+import leapMovement from "./leapMotionMovement";
 
 export default class Level2 extends Phaser.Scene{
     constructor (){
@@ -12,9 +10,11 @@ export default class Level2 extends Phaser.Scene{
         this.loadIdle();
         this.loadRun();
         this.loadRunReverse();
+
+        this.loadIngredients();
         this.loadPlatform();
+
         this.load.image('arrow', 'assets/spritesEnvironement/desertSprite/SignArrow.png');
-        this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
     }
     create(){
 
@@ -76,7 +76,7 @@ export default class Level2 extends Phaser.Scene{
         // Create platform
         this.hPlatforms = [{x:-50,y:670, scale:0.45}, {x:1280,y:770, scale:0.45}];
         this.stonePlatforms = [{x:310,y:470, scale: .3}, {x:500,y:330, scale: .3},{x:710,y:200, scale: .3}, {x:900,y:330, scale: .3}, {x:1110,y:470, scale: .3}];
-        this.cheeses = [{x:310,y:440},{x:500,y:300},{x:710,y:170},{x:900,y:300},{x:1110,y:440},];
+        this.listIngredients = [{x:310,y:440},{x:500,y:300},{x:710,y:170},{x:900,y:300},{x:1110,y:440},];
 
         //Platform group
         this.objectPlatform = this.physics.add.staticGroup();
@@ -94,26 +94,28 @@ export default class Level2 extends Phaser.Scene{
                 .refreshBody();
         });
 
-        // Chesses group
-        this.objectCheeses = this.physics.add.staticGroup();
-        this.objectCheeses.enableBody = true;
-        this.cheeses.forEach(cheese => {
-            this.objectCheeses
-                .create(cheese.x, cheese.y, 'cheese')
-                .setScale( cheese.scale ? cheese.scale : 1 )
+        // Group ingrédients
+        this.ingredients =['fraise', 'cheese', 'carrots'];
+
+        this.objectIngredients = this.physics.add.staticGroup();
+        this.objectIngredients.enableBody = true;
+        this.listIngredients.forEach(listIngredient => {
+            this.objectIngredients
+                .create(listIngredient.x, listIngredient.y, this.ingredients[Math.floor(Math.random()*this.ingredients.length)])
+                .setScale( listIngredient.scale ? listIngredient.scale : 1 )
                 .refreshBody();
         });
 
         //Score
         this.score = 0;
-        this.scoreText = this.add.text(16, 16,`Fromage:  ${this.score}` , { fontSize: '20px', fill: '#000' });
+        this.scoreText = this.add.text(16, 16,`Ingrédient:  ${this.score}` , { fontSize: '20px', fill: '#000' });
 
-        // Leap Motion
+        // Leap Motion movement
         leapMovement.call(this);
 
 
         // Collect cheeses
-        this.physics.add.overlap(this.player, this.objectCheeses, this.collectCheese, null, this);
+        this.physics.add.overlap(this.player, this.objectIngredients, this.collectIngredients, null, this);
 
         // Next level
         this.nextLevel = this.physics.add.image(1200, 83,'arrow');
@@ -125,7 +127,10 @@ export default class Level2 extends Phaser.Scene{
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
 
+        // Mouvement clavier
         this.movement();
+
+        // Défaite
         if (this.player.y + (this.player.height * 0.19) >= config.height) {
             this.scene.start('gameover');
         }
@@ -176,20 +181,26 @@ export default class Level2 extends Phaser.Scene{
         this.load.image('Run7Reverse', 'assets/spritesCharacter/Robin_Cook/Run7Reverse.png');
         this.load.image('Run8Reverse', 'assets/spritesCharacter/Robin_Cook/Run8Reverse.png');
     }
+
+    loadIngredients(){
+        this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
+        this.load.image('fraise', 'assets/spritesEnvironement/Fraise.png');
+        this.load.image('carrots', 'assets/spritesEnvironement/carrots.png');
+    }
     loadPlatform(){
         this.load.image('hPlatform', 'assets/spritesEnvironement/desertSprite/hPlatform.png');
         this.load.image('stonePlatform', 'assets/spritesEnvironement/desertSprite/StoneBlock.png');
     }
-    collectCheese(player,cheeses){
-        cheeses.disableBody(true, true);
 
+    collectIngredients(player,ingredients){
+        ingredients.disableBody(true, true);
         this.score += 1;
-        (this.score <= 1) ? (this.scoreText.setText( `Fromage: ${this.score}` )) : ( this.scoreText.setText( `Fromages: ${this.score}` ));
+        (this.score <= 1) ? (this.scoreText.setText( `Ingrédient: ${this.score}` )) : ( this.scoreText.setText( `Ingrédients: ${this.score}` ));
     }
     startNextLevel(player, nextLevel){
-        if (this.objectCheeses.countActive(true) === 0){
+        if (this.objectIngredients.countActive(true) === 0){
             nextLevel.disableBody(true, true);
-            this.scene.start('menu');
+            this.scene.start('level3');
         }
     }
 }

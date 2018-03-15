@@ -6,6 +6,7 @@ import menuScene from './menu.scene';
 import Level1 from './level1';
 import Level2 from './level2';
 import Level3 from './level3';
+import Level4 from './level4';
 import Win from './win'
 import GameOver from './gameover';
 
@@ -27,6 +28,7 @@ game.scene.add('menu', menuScene);
 game.scene.add('level1', Level1);
 game.scene.add('level2', Level2);
 game.scene.add('level3', Level3);
+game.scene.add('level4', Level4);
 
 game.scene.add('win', Win);
 game.scene.add('gameover', GameOver);
