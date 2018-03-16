@@ -1,13 +1,11 @@
 import config from './config';
 import leapMovement from './leapMotionMovement';
 
-import Wolf from "./wolf.js";
 
-export default class Level1 extends Phaser.Scene{
+export default class Level1 extends Phaser.Scene {
     constructor (){
-        super({ key: 'level1' });
+        super( { key: 'level1' } );
     }
-
     preload(){
         this.load.image('bg', 'assets/spritesEnvironement/desertSprite/BG.png');
         this.loadIdle();
@@ -16,40 +14,13 @@ export default class Level1 extends Phaser.Scene{
 
         this.loadIngredients();
         this.loadPlatform();
-        this.loadProps();
 
         this.load.image('arrow', 'assets/spritesEnvironement/desertSprite/SignArrow.png');
-
-
-        this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 170 ,frameHeight: 170});
-        this.load.spritesheet('wolfReverse', 'assets/spritesCharacter/Wolf/wolfWalkReverse.png',{frameWidth: 170 ,frameHeight: 170});
     }
-
     create(){
         // Background
         this.add.image(640, 330, 'bg');
-
-
-        // Props
-        this.add.image(100,130,'bush').setScale(.6);
-        this.add.image(800,615,'bush').setScale(.6);
-
-        this.add.image(130,517,'skeleton').setScale(.9);
-        this.add.image(745,380,'skeleton').setScale(.9);
-
-        this.add.image(1200,495,'cactus').setScale(.9);
-
-        this.add.image(50,517,'stone');
-        this.add.image(580,232,'stone').setScale(.9);
-
-        this.add.image(820,310,'tree').setScale(.7);
-
-        this.add.image(450,240,'grass').setScale(.7);
-        this.add.image(895,375,'grass').setScale(.9);
-
-
-
-        // Animation joueur
+        // Anim joueur
         this.anims.create({
             key: 'idle',
             frames: [
@@ -101,16 +72,15 @@ export default class Level1 extends Phaser.Scene{
         this.player = this.physics.add.sprite(50, 490, 'Idle1').setScale(0.19).setCollideWorldBounds(true).play('idle');
         this.input = this.input.keyboard.createCursorKeys();
 
+        //create positions
+        this.Platforms = [ {x:350,y:400, scale: .2}, {x:500,y:250, scale: .2}, {x:825,y:700, scale: .6}, {x:850,y:170, scale: .25} ];
+        this.hPlatforms = [ {x: 70, y: 650, scale: .45}, {x: 50, y: 250, scale: .30}, {x: 1115, y: 650, scale: .45}, {x: 1210, y: 290, scale: .3} ];
+        this.listIngredients = [{x:50,y:160},{x:360,y:375},{x:510,y:229},{x:860,y:142},{x:1150,y:200},];
 
-        // Create object
-        this.Platforms = [ {x:510,y:270, scale: .35}, {x:810,y:410, scale: .35} ];
-        this.hPlatforms = [ {x: 70, y: 650, scale: .45}, {x: 50, y: 250, scale: .40}, {x: 1190, y: 650, scale: .45},{x: 1210, y: 200, scale: .3}, {x: 750, y: 750, scale: .45} ];
-        this.listIngredients = [{x:400,y:440},{x:50,y:135},{x:510,y:238},{x:900,y:100},{x:1110,y:440},];
 
-
+        // Group platform
         this.objectPlatform = this.physics.add.staticGroup();
         this.objectPlatform.enableBody = true;
-
         this.Platforms.forEach(Platform => {
             this.objectPlatform
                 .create(Platform.x, Platform.y, 'Platform')
@@ -137,79 +107,45 @@ export default class Level1 extends Phaser.Scene{
                 .refreshBody();
         });
 
-
-        // Create wolf + animation + collision
-
-        this.collisionsWolf = [{x:560,y:570},{x:900,y:570}];
-        this.objectCollision = this.physics.add.staticGroup();
-        this.objectCollision.enableBody = true;
-        this.collisionsWolf.forEach(collisionWolf => {
-            this.objectCollision
-                .create(collisionWolf.x, collisionWolf.y, 'cheese')
-                .refreshBody();
-
-        });
-
-
-        for (let i = 0; i < this.collisionsWolf.length; i++){
-            this.objectCollision.children.entries[i].alpha = 0;
-        }
-
-
-        this.wolfGroup = this.add.group();
-        let wolf = { scene: this, x : 852, y: 595, key: 'wolf' };
-        this.wolfGroup.add(new Wolf(wolf));
-
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNumbers('wolf'),
-            frameRate: 6,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'walkReverse',
-            frames: this.anims.generateFrameNumbers('wolfReverse'),
-            frameRate: 6,
-            repeat: -1
-        });
-        this.anims.play('walk', this.wolfGroup.getChildren());
-
-
         // Leap Motion movement
         leapMovement.call(this);
 
         //score
         this.score = 0;
         this.scoreText = this.add.text(16, 16,`Ingrédients:  ${this.score} / ${this.listIngredients.length}` , { fontSize: '20px', fill: '#000' });
+
         this.physics.add.overlap(this.player, this.objectIngredients, this.collectIngredients, null, this);
 
-        // Death
-        this.physics.add.overlap(this.player, this.wolfGroup, this.death, null, this);
-
         // Next level
-        this.nextLevel = this.physics.add.image(1200, 0,'arrow');
+        this.nextLevel = this.physics.add.image(1200, 495,'arrow');
         this.physics.add.overlap(this.player, this.nextLevel, this.startNextLevel, null, this);
 
     }
-
     update(){
+
         // Collision
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
-        this.physics.add.collider(this.wolfGroup, this.objectPlatform);
-        this.physics.add.collider(this.objectCollision, this.objectPlatform);
-        this.physics.add.collider(this.wolfGroup, this.objectCollision);
-
-
-        this.wolfGroup.children.iterate((wolf)=>{
-            wolf.update();
-        });
 
         // Movement keyboard
         this.movement();
 
         // Death
         if (this.player.y + (this.player.height * 0.19) >= config.height) this.scene.start('gameover');
+    }
+
+    movement(){
+        if (this.input.left.isDown){
+            this.player.setVelocityX(-300);
+        }else if (this.input.right.isDown){
+            this.player.setVelocityX(300);
+            this.player.anims.play('run');
+        }else{
+            this.player.setVelocityX(0);
+        }
+        if (this.input.up.isDown && this.player.body.touching.down){
+            this.player.setVelocityY(-300);
+        }
     }
 
     loadIdle(){
@@ -244,50 +180,27 @@ export default class Level1 extends Phaser.Scene{
         this.load.image('Run7Reverse', 'assets/spritesCharacter/Robin_Cook/Run7Reverse.png');
         this.load.image('Run8Reverse', 'assets/spritesCharacter/Robin_Cook/Run8Reverse.png');
     }
+
+    loadPlatform(){
+        this.load.image('Platform', 'assets/spritesEnvironement/desertSprite/Platform.png');
+        this.load.image('hPlatform', 'assets/spritesEnvironement/desertSprite/hPlatform.png');
+    }
     loadIngredients(){
         this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
         this.load.image('fraise', 'assets/spritesEnvironement/Fraise.png');
         this.load.image('carrots', 'assets/spritesEnvironement/carrots.png');
     }
-    loadPlatform(){
-        this.load.image('Platform', 'assets/spritesEnvironement/desertSprite/Platform.png');
-        this.load.image('hPlatform', 'assets/spritesEnvironement/desertSprite/hPlatform.png');
-    }
-    loadProps(){
-        this.load.image('bush', 'assets/spritesEnvironement/desertSprite/bush.png');
-        this.load.image('grass', 'assets/spritesEnvironement/desertSprite/grass.png');
-        this.load.image('cactus', 'assets/spritesEnvironement/desertSprite/cactus.png');
-        this.load.image('tree', 'assets/spritesEnvironement/desertSprite/tree.png');
-        this.load.image('skeleton', 'assets/spritesEnvironement/desertSprite/skeleton.png');
-        this.load.image('stone', 'assets/spritesEnvironement/desertSprite/stone.png');
-    }
 
-    movement(){
-        if (this.input.left.isDown){
-            this.player.setVelocityX(-300);
-        }else if (this.input.right.isDown){
-            this.player.setVelocityX(300);
-            this.player.anims.play('run');
-        }else{
-            this.player.setVelocityX(0);
-        }
-        if (this.input.up.isDown && this.player.body.touching.down){
-            this.player.setVelocityY(-300);
-        }
-    }
 
     collectIngredients(player,ingredients){
         ingredients.disableBody(true, true);
         this.score += 1;
         (this.score <= 1) ? (this.scoreText.setText( `Ingrédient:  ${this.score} / ${this.listIngredients.length}` )) : ( this.scoreText.setText( `Ingrédients:  ${this.score} / ${this.listIngredients.length}` ));
     }
-    death(){
-        this.scene.start('gameover');
-    }
     startNextLevel(player, nextLevel){
         if (this.objectIngredients.countActive(true) === 0){
             nextLevel.disableBody(true, true);
-            this.scene.start('level2');
+            this.scene.start('level4');
         }
     }
 }
