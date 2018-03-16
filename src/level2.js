@@ -127,13 +127,11 @@ export default class Level2 extends Phaser.Scene{
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
 
-        // Mouvement clavier
+        // Movement clavier
         this.movement();
 
-        // Défaite
-        if (this.player.y + (this.player.height * 0.19) >= config.height) {
-            this.scene.start('gameover');
-        }
+        // Death
+        if (this.player.y + (this.player.height * 0.19) >= config.height) this.scene.start('gameover');
     }
 
     movement(){

@@ -1,6 +1,8 @@
 import config from './config';
 import leapMovement from './leapMotionMovement';
 
+import Wolf from "./wolf.js";
+
 export default class Level1 extends Phaser.Scene{
     constructor (){
         super({ key: 'level1' });
@@ -17,7 +19,10 @@ export default class Level1 extends Phaser.Scene{
         this.loadProps();
 
         this.load.image('arrow', 'assets/spritesEnvironement/desertSprite/SignArrow.png');
-        this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
+
+
+        this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 170 ,frameHeight: 170});
+        this.load.spritesheet('wolfReverse', 'assets/spritesCharacter/Wolf/wolfWalkReverse.png',{frameWidth: 170 ,frameHeight: 170});
     }
 
     create(){
@@ -44,7 +49,7 @@ export default class Level1 extends Phaser.Scene{
 
 
 
-        // Anim joueur
+        // Animation joueur
         this.anims.create({
             key: 'idle',
             frames: [
@@ -133,6 +138,42 @@ export default class Level1 extends Phaser.Scene{
         });
 
 
+        // Create wolf + animation + collision
+
+        this.collisionsWolf = [{x:560,y:570},{x:900,y:570}];
+        this.objectCollision = this.physics.add.staticGroup();
+        this.objectCollision.enableBody = true;
+        this.collisionsWolf.forEach(collisionWolf => {
+            this.objectCollision
+                .create(collisionWolf.x, collisionWolf.y, 'cheese')
+                .refreshBody();
+
+        });
+
+
+        for (let i = 0; i < this.collisionsWolf.length; i++){
+            this.objectCollision.children.entries[i].alpha = 0;
+        }
+
+
+        this.wolfGroup = this.add.group();
+        let wolf = { scene: this, x : 852, y: 595, key: 'wolf' };
+        this.wolfGroup.add(new Wolf(wolf));
+
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('wolf'),
+            frameRate: 6,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'walkReverse',
+            frames: this.anims.generateFrameNumbers('wolfReverse'),
+            frameRate: 6,
+            repeat: -1
+        });
+        this.anims.play('walk', this.wolfGroup.getChildren());
+
 
         // Leap Motion movement
         leapMovement.call(this);
@@ -146,21 +187,27 @@ export default class Level1 extends Phaser.Scene{
         // Next level
         this.nextLevel = this.physics.add.image(1200, 0,'arrow');
         this.physics.add.overlap(this.player, this.nextLevel, this.startNextLevel, null, this);
+
     }
 
     update(){
-
         // Collision
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
+        this.physics.add.collider(this.wolfGroup, this.objectPlatform);
+        this.physics.add.collider(this.objectCollision, this.objectPlatform);
+        this.physics.add.collider(this.wolfGroup, this.objectCollision);
 
-        // Mouvement clavier
+
+        this.wolfGroup.children.iterate((wolf)=>{
+            wolf.update();
+        });
+
+        // Movement keyboard
         this.movement();
 
-        // Défaite
-        if (this.player.y + (this.player.height * 0.19) >= config.height) {
-            this.scene.start('gameover');
-        }
+        // Death
+        if (this.player.y + (this.player.height * 0.19) >= config.height) this.scene.start('gameover');
     }
 
     loadIdle(){

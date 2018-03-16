@@ -11,8 +11,6 @@ export default class menuScene extends Phaser.Scene {
     }
 
     update(){
-        if (this.enterKey.isDown){
-            this.scene.start('level4');
-        }
+        if (this.enterKey.isDown) this.scene.start('level1');
     }
 }

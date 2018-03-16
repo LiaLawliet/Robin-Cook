@@ -23,7 +23,7 @@ export default class Level4 extends Phaser.Scene{
         // Background
         this.add.image(640, 330, 'bg');
 
-        // Anim joueur
+        // Animation joueur
         this.anims.create({
             key: 'idle',
             frames: [
@@ -137,9 +137,23 @@ export default class Level4 extends Phaser.Scene{
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
 
-        // Défaite
-        if (this.player.y + (this.player.height * 0.19) >= config.height) {
-            this.scene.start('gameover');
+        this.movement();
+        // Death
+        if (this.player.y + (this.player.height * 0.19) >= config.height) this.scene.start('gameover');
+    }
+
+
+    movement(){
+        if (this.input.left.isDown){
+            this.player.setVelocityX(-300);
+        }else if (this.input.right.isDown){
+            this.player.setVelocityX(300);
+            this.player.anims.play('run');
+        }else{
+            this.player.setVelocityX(0);
+        }
+        if (this.input.up.isDown && this.player.body.touching.down){
+            this.player.setVelocityY(-300);
         }
     }
 
