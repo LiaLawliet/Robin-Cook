@@ -181,8 +181,10 @@ export default class Level1 extends Phaser.Scene{
         //score
         this.score = 0;
         this.scoreText = this.add.text(16, 16,`Ingrédients:  ${this.score} / ${this.listIngredients.length}` , { fontSize: '20px', fill: '#000' });
-
         this.physics.add.overlap(this.player, this.objectIngredients, this.collectIngredients, null, this);
+
+        // Death
+        this.physics.add.overlap(this.player, this.wolfGroup, this.death, null, this);
 
         // Next level
         this.nextLevel = this.physics.add.image(1200, 0,'arrow');
@@ -242,7 +244,6 @@ export default class Level1 extends Phaser.Scene{
         this.load.image('Run7Reverse', 'assets/spritesCharacter/Robin_Cook/Run7Reverse.png');
         this.load.image('Run8Reverse', 'assets/spritesCharacter/Robin_Cook/Run8Reverse.png');
     }
-
     loadIngredients(){
         this.load.image('cheese', 'assets/spritesEnvironement/fromage.png');
         this.load.image('fraise', 'assets/spritesEnvironement/Fraise.png');
@@ -279,6 +280,9 @@ export default class Level1 extends Phaser.Scene{
         ingredients.disableBody(true, true);
         this.score += 1;
         (this.score <= 1) ? (this.scoreText.setText( `Ingrédient:  ${this.score} / ${this.listIngredients.length}` )) : ( this.scoreText.setText( `Ingrédients:  ${this.score} / ${this.listIngredients.length}` ));
+    }
+    death(){
+        this.scene.start('gameover');
     }
     startNextLevel(player, nextLevel){
         if (this.objectIngredients.countActive(true) === 0){
