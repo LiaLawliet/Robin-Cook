@@ -1,5 +1,6 @@
 import config from './config';
 import leapMovement from './leapMotionMovement';
+import StrongWolf from "./strongWolf.js";
 
 export default class Level4 extends Phaser.Scene{
     constructor(){
@@ -16,10 +17,14 @@ export default class Level4 extends Phaser.Scene{
         this.loadPlatform();
         this.loadIngredients();
 
+        this.load.image('bomb', 'assets/spritesCharacter/Wolf/bomb.png');
+
         this.load.image('arrow', 'assets/spritesEnvironement/desertSprite/SignArrow.png');
+        this.load.spritesheet('wolf', 'assets/spritesCharacter/Wolf/wolfWalk.png',{frameWidth: 170 ,frameHeight: 170});
     }
 
     create(){
+        this.bombs;
         // Background
         this.add.image(640, 330, 'bg');
 
@@ -76,10 +81,10 @@ export default class Level4 extends Phaser.Scene{
         this.input = this.input.keyboard.createCursorKeys();
 
         // Create platform position
-        this.sPlatforms = [{x:350,y:320,scale:.60}, {x:850,y:300,scale:.60}];
-        this.Platforms = [{x:670,y:450,scale:.35}];
+        this.sPlatforms = [{x:350,y:320,scale:.60}, {x:1050,y:330,scale:.60}];
+        this.Platforms = [{x:670,y:450,scale:.35}, {x:700,y:100,scale:.35}];
         this.hPlatforms = [ {x: 150, y: 730, scale: .75}, {x: 50, y: 250, scale: .30}, {x: 1150, y: 750, scale: .7}];
-        this.listIngredients = [{x:50,y:160},{x:360,y:279},{x:700,y:415},{x:860,y:258}];
+        this.listIngredients = [{x:50,y:160},{x:360,y:279},{x:700,y:415},{x:1050,y:290}];
 
         // Group platform
         this.objectPlatform = this.physics.add.staticGroup();
@@ -131,11 +136,35 @@ export default class Level4 extends Phaser.Scene{
         this.nextLevel = this.physics.add.image(1200, 0,'arrow');
         this.physics.add.overlap(this.player, this.nextLevel, this.startNextLevel, null, this);
 
+        this.strongWolfGroup = this.add.group();
+
+        this.strongWolf = { scene: this, x : 700, y: 50, key: 'wolf' };
+
+        this.strongWolfGroup.add(new StrongWolf(this.strongWolf));
+
+        let timer = this.time.addEvent({
+            delay: 500,
+            callback: this.attack,
+            callbackScope: this,
+            loop : true
+        });
+
+        this.physics.add.overlap(this.player, this.strongWolfGroup, this.death, null, this);
+
+
     }
+    attack(){
+        this.bombs = this.physics.add.image(this.strongWolf.x, this.strongWolf.y, "bomb").setScale(0.10);
+        this.bombs.setVelocity(Phaser.Math.RND.integerInRange(-400,400),-300);
+        this.physics.add.overlap(this.player, this.bombs, this.death, null, this);
+    }
+
+
     update(){
         // Collision
         this.physics.add.collider(this.player, this.objectPlatform);
         this.physics.add.collider(this.nextLevel, this.objectPlatform);
+        this.physics.add.collider(this.strongWolfGroup, this.objectPlatform);
 
         this.movement();
         // Death
@@ -206,6 +235,9 @@ export default class Level4 extends Phaser.Scene{
         ingredients.disableBody(true, true);
         this.score += 1;
         (this.score <= 1) ? (this.scoreText.setText( `Ingrédient:  ${this.score} / ${this.listIngredients.length}` )) : ( this.scoreText.setText( `Ingrédients:  ${this.score} / ${this.listIngredients.length}` ));
+    }
+    death(){
+        this.scene.start('gameover');
     }
     startNextLevel(player, nextLevel){
         if (this.objectIngredients.countActive(true) === 0){

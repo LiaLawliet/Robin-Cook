@@ -287,7 +287,7 @@ export default class Level3 extends Phaser.Scene{
     startNextLevel(player, nextLevel){
         if (this.objectIngredients.countActive(true) === 0){
             nextLevel.disableBody(true, true);
-            this.scene.start('level2');
+            this.scene.start('level4');
         }
     }
 }

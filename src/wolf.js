@@ -6,8 +6,8 @@ export default class Wolf extends Enemy{
         super(config);
 
         this.body.setVelocity(0,0).setBounce(0, 0).setCollideWorldBounds(true);
-        this.scaleX = 0.5;
-        this.scaleY = 0.5;
+        this.scaleX = 0.3;
+        this.scaleY = 0.3;
         this.body.velocity.x = -100;
 
 
